@@ -56,7 +56,7 @@ merged_dict = {**dict_a, **dict_b}
 
 ## A. `*args` (위치 인자 묶기)
 
-몇 개의 인자가 들어올지 모를 때, 들어오는 값들을 **튜플(Tuple)**로 묶어줍니다.
+몇 개의 인자가 들어올지 모를 때, 들어오는 값들을 **튜플(Tuple)** 로 묶어줍니다.
 _(args는 관례적인 이름이며, `*numbers`처럼 바꿔 써도 무방합니다.)_
 
 ```python
@@ -71,7 +71,7 @@ save_numbers(10, 20, 30, 40)
 
 ### B. `**kwargs` (키워드 인자 묶기)
 
-`key=value` 형태로 들어오는 값들을 **딕셔너리(Dictionary)**로 묶어줍니다.
+`key=value` 형태로 들어오는 값들을 **딕셔너리(Dictionary)** 로 묶어줍니다.
 _(kwargs = Keyword Arguments)_
 
 ``` python
