@@ -1,3 +1,1 @@
-for test
-
-![[Pasted image 20260318014028.png]]
+[[01_AI_Study/01_코드_표현/00_코드_표현_INDEX|코드 표현]]
