@@ -488,3 +488,152 @@ x_repeated = x.repeat(4, 1)
 
 print(x_repeated.shape) # torch.Size([4, 3])
 ```
+
+# Tensor의 산술 연산
+텐서의 산술 연산은 요소별(Element-wise)로 이루어진다. 즉, 같은 위치에 있는 원소끼리 더하고 빼고 곱하고 나누는 방식이다.
+## **기본 사칙연산**
+파이썬의 표준 연산자(`+`, `-`, `*`, `/`)를 그대로 사용할 수 있으며, PyTorch 함수를 직접 호출할 수도 있다.
+
+```python
+import torch
+
+a = torch.tensor([1, 2, 3])
+b = torch.tensor([4, 5, 6])
+
+# 더하기
+print(a + b)        # tensor([5, 7, 9])
+print(torch.add(a, b))
+
+# 빼기
+print(a - b)        # tensor([-3, -3, -3])
+print(torch.sub(a, b))
+
+# 곱하기 (Element-wise)
+print(a * b)        # tensor([4, 10, 18])
+print(torch.mul(a, b))
+
+# 나누기
+print(a / b)        # tensor([0.25, 0.4, 0.5])
+print(torch.div(a, b))
+```
+
+## **행렬 곱셈 (Matrix Multiplication)**
+딥러닝에서 가장 많이 쓰이는 연산이다. 요소별 곱셈(`*`)과 달리, 행렬의 곱 규칙을 따르는 연산으로 `matmul()` 또는 `@` 연산자를 사용한다.
+
+```python
+m1 = torch.randn(3, 2)
+m2 = torch.randn(2, 4)
+
+print(m1@m2)
+print(torch.matmul(m1, m2).shape) # torch.Size([3, 4])
+```
+## 브로드캐스팅 (Broadcasting)
+텐서 연산을 할 때 두 텐서의 크기(Shape)가 달라도, 일정한 조건만 만족하면 PyTorch가 자동으로 크기를 맞춰 연산을 수행한다. 이를 브로드캐스팅이라 한다.
+```python
+m1 = torch.tensor([[1, 2]]) # (1, 2)
+m2 = torch.tensor([3])      # (1,) -> 내부적으로 [[3, 3]]으로 확장됨
+
+print(m1 + m2) # tensor([[4, 5]])
+```
+**주의:** 브로드캐스팅은 편리하지만, 의도치 않은 차원 확장이 발생하여 버그의 원인이 될 수 있으므로 연산 전후의 `shape`을 항상 확인해야 한다.
+
+## 논리 연산 (Logical Operations)
+텐서의 각 원소가 특정 조건을 만족하는지 확인하여 `True` 또는 `False`(정확히는 `ByteTensor` 또는 `BoolTensor`)를 반환한다.
+## **비교 연산**
+* `==` (Equal)
+* `!=` (Not Equal)
+* `>`, `<` (Greater/Less than)
+* `>=`, `<=` (Greater/Less than or Equal)
+
+```python
+t = torch.tensor([[1, 2], [3, 4]])
+
+print(t == 3) 
+# [[False, False],
+#  [True,  False]]
+
+print(t > 2)
+# [[False, False],
+#  [True,  True]]
+```
+함수 표현 방식도 있음
+
+| **함수명**        | **의미**                         | **연산자** |
+| -------------- | ------------------------------ | ------- |
+| **torch.eq()** | Equal (같음)                     | `==`    |
+| **torch.ne()** | Not Equal (같지 않음)              | `!=`    |
+| **torch.gt()** | Greater Than (보다 큼)            | `>`     |
+| **torch.ge()** | Greater than or Equal (크거나 같음) | `>=`    |
+| **torch.lt()** | Less Than (보다 작음)              | `<`     |
+| **torch.le()** | Less than or Equal (작거나 같음)    | `<=`    |
+## **코드 예시**
+```python
+import torch
+
+a = torch.tensor([1, 2, 3])
+b = torch.tensor([2, 2, 2])
+
+# a의 원소가 b의 원소보다 큰지 비교 (Greater Than)
+print(torch.gt(a, b)) 
+# 결과: tensor([False, False,  True])
+
+# a의 원소가 b의 원소와 다른지 비교 (Not Equal)
+print(torch.ne(a, b))
+# 결과: tensor([ True, False,  True])
+```
+
+텐서의 논리 연산은 파이썬의 일반적인 자료형과 다르게 작동하는 부분이 있어 주의가 필요하다. 특히 파이썬의 기본 키워드인 `and`, `or`, `not`을 그대로 사용할 수 없다는 점이 핵심이다.
+
+---
+
+## 텐서의 논리 연산 (Logical Operations)
+텐서는 여러 개의 요소를 가진 배열이기 때문에, 파이썬 입장에서 `and`나 `or`를 마주하면 "이 텐서 전체가 True인지 False인지" 판단할 수 없어 에러(`RuntimeError`)를 발생시킨다. 따라서 텐서에서는 **요소별(Element-wise) 논리 연산**을 수행하는 전용 방법들을 사용해야 한다.
+
+### **방법 1: 비트 연산자 (&, |, ~, ^) 사용**
+가장 직관적이고 많이 쓰이는 방식이다. 파이썬의 기본 연산자 대신 기호를 사용하여 각 원소끼리 비교한다.
+
+* `&` : AND (교집합)
+* `|` : OR (합집합)
+* `~` : NOT (여집합/반전)
+* `^` : XOR (대칭차집합)
+
+```python
+x = torch.tensor([1, 5, 10])
+
+# 3보다 크고(&) 8보다 작은 값 찾기
+mask = (x > 3) & (x < 8) 
+print(mask) # tensor([False,  True, False])
+```
+
+### **방법 2: PyTorch 논리 연산 함수 사용**
+함수명을 명시하여 더 명확하게 연산 의도를 드러낼 수 있다.
+
+* `torch.logical_and()`
+* `torch.logical_or()`
+* `torch.logical_not()`
+* `torch.logical_xor()`
+
+```python
+a = torch.tensor([True, False, True])
+b = torch.tensor([True, True, False])
+
+print(torch.logical_and(a, b)) # tensor([True, False, False])
+```
+
+
+## 전체 혹은 일부 판정: all()과 any()
+
+텐서의 원소들을 하나하나 비교하는 것이 아니라, 텐서 전체의 상태를 단일 `True/False`로 요약하고 싶을 때 사용한다. 이 함수를 거치면 결과가 하나로 나오기 때문에 파이썬의 `if`문 조건식 등에 활용할 수 있다.
+
+* **all()**: 모든 요소가 `True`여야 `True`를 반환한다. (하나라도 `False`면 `False`)
+* **any()**: 요소 중 하나라도 `True`가 있으면 `True`를 반환한다. (모두 `False`여야 `False`)
+
+```python
+t = torch.tensor([1, 2, 3])
+
+# 모든 원소가 0보다 큰가?
+print((t > 0).all()) # tensor(True)
+
+# 3보다 큰 원소가 하나라도 있는가?
+print((t > 3).any()) # tensor(False)
+```
